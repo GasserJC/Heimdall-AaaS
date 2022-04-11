@@ -2,36 +2,51 @@ package serial
 
 import (
 	"strings"
-	"heimdall.com/app/User"
-	"fmt"
+
+	user "heimdall.com/app/User"
 )
 
-func Deserialize(listToSave []string, delimiter string) string{
-	return (delimiter + strings.Join(listToSave, delimiter))
+func Deserialize(serializedValues []string, delimiter string) string {
+	return (delimiter + strings.Join(serializedValues, delimiter))
 }
 
-func Serialize(row string) user.UC{
-	usrArr := splitDelimitedString(row)
-	usr := user.UC{ Key:usrArr[0], Username:usrArr[1], Password:usrArr[2] }
-	return usr
+func Serialize(row string) user.UC {
+	serializedValues := splitDelimitedString(row)
+	serializedObject := user.UC{Key: serializedValues[0], Username: serializedValues[1], Password: serializedValues[2]}
+	return serializedObject
 }
 
-func splitDelimitedString(row string) []string {
-	var delimiter = row[0:1]
+func splitDelimitedString(delimitedRow string) []string {
+	var delimiter string
 	var element string
-	var delimitedString []string
-	var rowLength = len(row)
-	for position, character := range row {
+	var delimitedValues []string
+	var rowLength = len(delimitedRow)
+	for position, character := range delimitedRow {
 		if (string(character) == delimiter) && (position != 0) {
-			
-			delimitedString = append(delimitedString, element)
+			delimitedValues = append(delimitedValues, element)
 			element = ""
-		} else if position != 0 {
+		} else if (position > 0) && (position < rowLength-1) {
 			element += string(character)
-		} else if position == rowLength - 1 {
-			delimitedString = append(delimitedString, element+character)
+		} else if position == rowLength-1 {
+			delimitedValues = append(delimitedValues, element+string(character))
+		} else {
+			delimiter = string(character)
 		}
 	}
-	fmt.Println(delimitedString)
-	return delimitedString
+	return delimitedValues
+}
+
+func GetFirstValue(delimitedRow string) string {
+	var element string
+	var delimiter string
+	for position, character := range delimitedRow {
+		if (string(character) == delimiter) && (position != 0) {
+			return element
+		} else if position != 0 {
+			element += string(character)
+		} else {
+			delimiter = string(character)
+		}
+	}
+	return element
 }
