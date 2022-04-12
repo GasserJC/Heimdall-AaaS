@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	cryptography "heimdall.com/app/Cryptography"
@@ -9,20 +10,31 @@ import (
 )
 
 func main() {
+	users := generateArrayOfRandomStrings(5000)
+	passwords := generateArrayOfRandomStrings(5000)
 	start := time.Now()
-	for i := 1; i <= 5000; i++ {
-		AddUser("jgasser", "strongPassword")
-		AddUser("agasser", "strongPassword")
-		AddUser("sgasser", "strongPassword")
-		RemoveUser("jgasser", "goodPassword")
-		RemoveUser("agasser", "strongPassword")
-		RemoveUser("sgasser", "strongestPassword")
+	for i := 1; i < 5000; i++ {
+		AddUser(users[i], passwords[i])
 	}
 	duration := time.Since(start)
-	fmt.Print("Seconds for 15,000 writes & 15,000 deletes: ")
+	fmt.Print("Seconds for 500 writes")
 	fmt.Println(duration)
 	fmt.Print("Seconds per avg write/delete: ")
-	fmt.Println(duration / 30000)
+	fmt.Println(duration / 5000)
+}
+func generateArrayOfRandomStrings(size int) []string {
+	var randomStrings []string
+	for i := 1; i <= size; i++ {
+		randomStrings = append(randomStrings, randomString(10))
+	}
+	return randomStrings
+}
+
+func randomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	b := make([]byte, length)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)[:length]
 }
 
 func AddUser(username string, password string) bool {
