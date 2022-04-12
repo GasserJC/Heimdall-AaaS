@@ -1,6 +1,6 @@
 # Heimdall Authentication as a Service Go API
 Create an light weight and performant AaaS API.  
-This DOES NOT safe ANY user data, hashes provide a tool to authenticate users via a username and password without saving user data.  
+This DOES NOT save ANY user data, hashes provide a tool to authenticate users via a username and password without saving user data.  
 Future functionality: Add User Removal  
   
 Restrictions: persistant deployments.  
