@@ -24,6 +24,9 @@ func Read(filePath string, fileName string, prex string) []string {
 func WriteLine(filePath string, fileName string, rowValue string, rowPrex string) bool {
 	// if the file does not exist, then create it.
 	filePath = "data/" + filePath
+	if _, err := os.Stat("./data"); os.IsNotExist(err) {
+		createFolder("./data", "")
+	}
 	if _, err := os.Stat("./" + filePath); os.IsNotExist(err) {
 		createFolder(filePath, "")
 	}

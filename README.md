@@ -1,6 +1,7 @@
 # Heimdall Authentication as a Service Go API
-Current Goal: Create an light weight and performant AaaS API.  
-Next Goal: Add User Removal  
+Create an light weight and performant AaaS API.  
+This DOES NOT safe ANY user data, hashes provide a tool to authenticate users via a username and password without saving user data.  
+Future functionality: Add User Removal  
   
 Restrictions: persistant deployments.  
   
@@ -21,3 +22,7 @@ User Count == 1,000,000
 Add User: ~7000 Microseconds (7 Milliseconds)  
 Authenticate User: ~ 7 Microseconds (.007 Milliseconds)  
 Database size at 100,000 user count: 22,900 KB (24 Bytes per User of Disk Space)  
+
+# Documentation
+
+to be written...
