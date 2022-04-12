@@ -1,56 +1,71 @@
-package main
+package heimdall
 
 import (
-	"crypto/sha256"
 	"fmt"
-	"unsafe"
+	"math/rand"
+	"runtime"
+	"time"
 
+	cryptography "heimdall.com/app/Cryptography"
 	file "heimdall.com/app/FileIO"
-	serial "heimdall.com/app/Serializing"
-	user "heimdall.com/app/User"
 )
 
-func main() {
-	AddUser("jgasser", "strongPassword")
-	fmt.Println(AuthUser("jgasser", "strongPassword"))
+func AddUser(application string, username string, password string) {
+	go addUserHelper(application, username, password)
 }
 
-func AddUser(username string, password string) {
-	key := generateKey(username, password)
-	usr := user.UC{Key: key, Username: username, Password: password}
-	file.Write("data", "output", usr)
+func AuthUser(application string, username string, password string) {
+	go authUserHelper(application, username, password)
 }
 
-func AuthUser(username string, password string) bool {
-	var rows = file.Read("data", "output")
+func addUserHelper(application string, username string, password string) bool {
+	userHash := generateUserHash(username, password)
+	userPrex := getUserHashPrex(userHash)
+	return file.WriteLine(application, "output", userHash, userPrex)
+}
+
+func authUserHelper(application string, username string, password string) string {
+	userHash := generateUserHash(username, password)
+	userPrex := getUserHashPrex(userHash)
+	rows := file.Read(application, "output", userPrex)
 	for _, row := range rows {
-		user := serial.Serialize(row)
-		if (user.Username == username) && (user.Password == password) {
-			return true
+		if row == userHash {
+			return userHash
 		}
 	}
-	return false
+	return ""
 }
 
-func generateKey(username string, password string) string {
-	// using a string1_string2_string2_string1 input string for a hash means it does not mean
-	// a user with a username of someone else's password which has their password as their username is
-	// not going to produce the same hash
-	var hashString = username + password + password + username
-	return hash(hashString)
-}
-
-func hash(inputString string) string {
-	hashBytes := sha256.Sum256([]byte(inputString))
-	hashNumber := byteArrayToInt(hashBytes)
-	return fmt.Sprint(hashNumber)
-}
-
-func byteArrayToInt(arr [32]byte) int64 {
-	val := int64(0)
-	size := len(arr)
-	for i := 0; i < size; i++ {
-		*(*uint8)(unsafe.Pointer(uintptr(unsafe.Pointer(&val)) + uintptr(i))) = arr[i]
+func generateArrayOfRandomStrings(size int) []string {
+	var randomStrings []string
+	for i := 1; i <= size; i++ {
+		randomStrings = append(randomStrings, randomString(10, i))
 	}
-	return val
+	return randomStrings
+}
+
+func randomString(length int, mutex int) string {
+	rand.Seed(time.Now().UnixNano() + int64(mutex))
+	b := make([]byte, length)
+	rand.Read(b)
+	return fmt.Sprintf("%x", b)[:length]
+}
+
+func getUserHashPrex(userHash string) string {
+	if userHash[0] == '-' {
+		return userHash[0:4]
+	} else {
+		return userHash[0:3]
+	}
+}
+
+func generateUserHash(username string, password string) string {
+	var hashString = username + password + password + username
+	return cryptography.Hash(hashString)
+}
+
+func buffer() {
+	if runtime.NumGoroutine() > 10000 {
+		time.Sleep(time.Microsecond)
+	}
 }
