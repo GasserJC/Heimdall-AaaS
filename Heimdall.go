@@ -1,11 +1,6 @@
-package heimdall
+package main
 
 import (
-	"fmt"
-	"math/rand"
-	"runtime"
-	"time"
-
 	cryptography "heimdall.com/app/Cryptography"
 	file "heimdall.com/app/FileIO"
 )
@@ -19,14 +14,14 @@ func AuthUser(application string, username string, password string) {
 }
 
 func addUserHelper(application string, username string, password string) bool {
-	userHash := generateUserHash(username, password)
-	userPrex := getUserHashPrex(userHash)
+	userHash := GenerateUserHash(username, password)
+	userPrex := GetUserHashPrex(userHash)
 	return file.WriteLine(application, "output", userHash, userPrex)
 }
 
 func authUserHelper(application string, username string, password string) string {
-	userHash := generateUserHash(username, password)
-	userPrex := getUserHashPrex(userHash)
+	userHash := GenerateUserHash(username, password)
+	userPrex := GetUserHashPrex(userHash)
 	rows := file.Read(application, "output", userPrex)
 	for _, row := range rows {
 		if row == userHash {
@@ -36,22 +31,7 @@ func authUserHelper(application string, username string, password string) string
 	return ""
 }
 
-func generateArrayOfRandomStrings(size int) []string {
-	var randomStrings []string
-	for i := 1; i <= size; i++ {
-		randomStrings = append(randomStrings, randomString(10, i))
-	}
-	return randomStrings
-}
-
-func randomString(length int, mutex int) string {
-	rand.Seed(time.Now().UnixNano() + int64(mutex))
-	b := make([]byte, length)
-	rand.Read(b)
-	return fmt.Sprintf("%x", b)[:length]
-}
-
-func getUserHashPrex(userHash string) string {
+func GetUserHashPrex(userHash string) string {
 	if userHash[0] == '-' {
 		return userHash[0:4]
 	} else {
@@ -59,13 +39,7 @@ func getUserHashPrex(userHash string) string {
 	}
 }
 
-func generateUserHash(username string, password string) string {
+func GenerateUserHash(username string, password string) string {
 	var hashString = username + password + password + username
 	return cryptography.Hash(hashString)
-}
-
-func buffer() {
-	if runtime.NumGoroutine() > 10000 {
-		time.Sleep(time.Microsecond)
-	}
 }
