@@ -8,10 +8,10 @@ import (
 )
 
 func reportPerformance() {
-	reportPerformanceAtSize(100)
-	reportPerformanceAtSize(10000)
+	//reportPerformanceAtSize(100)
+	//reportPerformanceAtSize(10000)
 	reportPerformanceAtSize(1000000)
-	reportPerformanceAtSize(100000000)
+	//reportPerformanceAtSize(100000000)
 }
 
 func reportPerformanceAtSize(size int) {
