@@ -25,11 +25,11 @@ func TestGetUserHashPrex(t *testing.T) {
 
 func TestAddUserHelper(t *testing.T) {
 	os.RemoveAll("./data/testingRoutine")
-	firstAdd := addUserHelper("testingRoutine", "test", "test")
+	firstAdd := AddUser("testingRoutine", "test", "test")
 	if firstAdd == false {
 		t.Errorf("Adding unique user failed.")
 	}
-	secondAdd := addUserHelper("testingRoutine", "test", "test")
+	secondAdd := AddUser("testingRoutine", "test", "test")
 	if secondAdd == true {
 		t.Errorf("Adding non-unique user was unexpectedly successful.")
 	}
@@ -38,12 +38,12 @@ func TestAddUserHelper(t *testing.T) {
 
 func TestAuthUserHelper(t *testing.T) {
 	os.RemoveAll("./data/testingRoutine")
-	addUserHelper("testingRoutine", "test", "test")
-	firstAuth := authUserHelper("testingRoutine", "test", "test")
+	AddUser("testingRoutine", "test", "test")
+	firstAuth := AuthUser("testingRoutine", "test", "test")
 	if firstAuth == "" {
 		t.Errorf("Authorizing existing user failed.")
 	}
-	secondAuth := authUserHelper("testingRoutine", "notauserwhoexists", "notauserwhoexists")
+	secondAuth := AuthUser("testingRoutine", "notauserwhoexists", "notauserwhoexists")
 	if secondAuth != "" {
 		t.Errorf("Authorizing non-existing user was unexpectedly successful.")
 	}

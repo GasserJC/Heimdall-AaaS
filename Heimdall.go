@@ -6,29 +6,33 @@ import (
 )
 
 func AddUser(application string, username string, password string) bool {
-	return addUserHelper(application, username, password)
+	out := make(chan bool)
+	go addUserHelper(application, username, password, out)
+	return <-out
 }
 
 func AuthUser(application string, username string, password string) string {
-	return authUserHelper(application, username, password)
+	out := make(chan string)
+	go authUserHelper(application, username, password, out)
+	return <-out
 }
 
-func addUserHelper(application string, username string, password string) bool {
+func addUserHelper(application string, username string, password string, out chan bool) {
 	userHash := GenerateUserHash(username, password)
 	userPrex := GetUserHashPrex(userHash)
-	return file.WriteLine(application, userPrex, userHash)
+	out <- file.WriteLine(application, userPrex, userHash)
 }
 
-func authUserHelper(application string, username string, password string) string {
+func authUserHelper(application string, username string, password string, out chan string) {
 	userHash := GenerateUserHash(username, password)
 	userPrex := GetUserHashPrex(userHash)
 	rows := file.Read(application, userPrex)
 	for _, row := range rows {
 		if row == userHash {
-			return userHash
+			out <- userHash
 		}
 	}
-	return ""
+	out <- ""
 }
 
 func GetUserHashPrex(userHash string) string {
