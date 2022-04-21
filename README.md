@@ -5,15 +5,15 @@ Future functionality: Add User Removal
   
 Restrictions: persistant deployments.  
   
-# Performance per Application on low Tier CPU  
+# Performance per Application on low Tier CPU Ubuntu 20.04 Container  
 User Count == 10,000  
-Add User: ~840 Microseconds
-Authenticate User: 99 Microseconds 
+Add User: ~75 Microseconds
+Authenticate User: 43 Microseconds 
   
   
 User Count == 100,000  
-Add User: ~930 Microseconds
-Authenticate User: ~110 Microseconds  
+Add User: ~95 Microseconds
+Authenticate User: ~85 Microseconds  
 
 # Documentation
 
