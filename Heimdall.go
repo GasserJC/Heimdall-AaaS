@@ -5,6 +5,10 @@ import (
 	file "heimdall.com/app/FileIO"
 )
 
+func main() {
+	reportPerformance()
+}
+
 func AddUser(application string, username string, password string) bool {
 	out := make(chan bool)
 	go addUserHelper(application, username, password, out)
@@ -26,13 +30,15 @@ func addUserHelper(application string, username string, password string, out cha
 func authUserHelper(application string, username string, password string, out chan string) {
 	userHash := GenerateUserHash(username, password)
 	userPrex := GetUserHashPrex(userHash)
+	authUserHash := ""
 	rows := file.Read(application, userPrex)
 	for _, row := range rows {
 		if row == userHash {
-			out <- userHash
+			authUserHash = userHash
+			break
 		}
 	}
-	out <- ""
+	out <- authUserHash
 }
 
 func GetUserHashPrex(userHash string) string {

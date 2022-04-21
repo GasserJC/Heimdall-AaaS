@@ -8,12 +8,12 @@ import (
 )
 
 func Read(directory string, filename string) []string {
-	relativeFilePath := "./data/" + directory + "/" + filename + ".txt"
+	relativeFilePath := baseDir + directory + "/" + filename + baseFileType
 	return readRelativePath(relativeFilePath)
 }
 
 func readRelativePath(relativePath string) []string {
-	filePointer := getFilePointer(relativePath)
+	filePointer := getFilePointer(relativePath, true)
 	var rows []string
 	scanner := bufio.NewScanner(filePointer)
 	for scanner.Scan() {
@@ -25,18 +25,15 @@ func readRelativePath(relativePath string) []string {
 
 func WriteLine(directory string, filename string, rowValue string) bool {
 	ensureFolderPath(directory)
-	fullRelativeFilePath := "./data/" + directory + "/" + filename + ".txt"
-	filePointer := getFilePointer(fullRelativeFilePath)
-	if write(fullRelativeFilePath, rowValue, filePointer) {
-		filePointer.Close()
-		return true
-	}
+	fullRelativeFilePath := baseDir + directory + "/" + filename + baseFileType
+	filePointer := getFilePointer(fullRelativeFilePath, false)
+	success := write(fullRelativeFilePath, rowValue, filePointer)
 	filePointer.Close()
-	return false
+	return success
 }
 
 func FileExists(fileName string) bool {
-	fPointer, _ := os.Stat("./data/" + fileName + ".txt")
+	fPointer, _ := os.Stat(baseDir + fileName + baseFileType)
 	return fPointer != nil
 }
 
@@ -54,34 +51,45 @@ func IsRowUnique(rowToWrite string, fullRelativeFilePath string, useLowMemory bo
 
 func ensureFolderPath(directory string) {
 	// if the file does not exist, then create it.
-	if _, err := os.Stat("./data"); os.IsNotExist(err) {
-		createFolder("./data", "")
+	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
+		createFolder(baseDir, "")
 	}
-	if _, err := os.Stat("./data/" + directory); os.IsNotExist(err) {
-		createFolder("./data/"+directory, "")
+	if _, err := os.Stat(baseDir + directory); os.IsNotExist(err) {
+		createFolder(baseDir+directory, "")
 	}
 }
 
-func getFilePointer(file string) *os.File {
+func getFilePointer(file string, readOnly bool) *os.File {
 	var filePointer *os.File
 	var err error
-	var attemptsLeft int = 100
-
+	attemptsLeft := baseAttemptsLeft
 	if _, err := os.Stat(file); errors.Is(err, os.ErrNotExist) {
 		filePointer, _ = os.Create(file)
 		return filePointer
 	}
 
 	for {
-		filePointer, err = os.Open(file)
+		if readOnly {
+			filePointer, err = os.Open(file)
+		} else {
+			filePointer, err = os.OpenFile(file, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		}
+
 		if (err == nil) || (attemptsLeft < 0) {
 			break
 		}
-		attemptsLeft -= 1
-		time.Sleep(5 * time.Millisecond)
+		attemptsLeft = resequence(attemptsLeft)
 	}
 
 	return filePointer
+}
+
+func resequence(attemptsLeft int) int {
+	if attemptsLeft > 0 {
+		attemptsLeft--
+		time.Sleep(baseResequenceTime * time.Millisecond)
+	}
+	return attemptsLeft
 }
 
 func createFolder(filePath string, folderName string) {
@@ -92,38 +100,16 @@ func write(fullRelativeFilePath string, rowValue string, filePointer *os.File) b
 	if !IsRowUnique(rowValue, fullRelativeFilePath, false) {
 		return false
 	}
+	attemptsLeft := baseAttemptsLeft
 	var err error
-	if _, err = filePointer.WriteString(rowValue + "\n"); err != nil {
-		panic(err)
-	}
-	return true
-}
-
-func delete(slice []string, element string) []string {
-	index := indexOf(slice, element)
-	if index >= 0 {
-		slice = removeIndex(slice, index)
-	}
-	return slice
-}
-
-func removeIndex(slice []string, index int) []string {
-	return append(slice[:index], slice[index+1:]...)
-}
-
-func indexOf(slice []string, element string) int {
-	for i := range slice {
-		if slice[i] == element {
-			return i
+	for {
+		if _, err = filePointer.WriteString(rowValue + "\n"); err == nil {
+			break
+		}
+		attemptsLeft = resequence(attemptsLeft)
+		if (attemptsLeft == 0) && err != nil {
+			panic(err)
 		}
 	}
-	return -1
-}
-
-func generateUserHash(userHash string) string {
-	if userHash[0] == '-' {
-		return userHash[0:4]
-	} else {
-		return userHash[0:3]
-	}
+	return true
 }
