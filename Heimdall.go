@@ -5,24 +5,24 @@ import (
 	file "heimdall.com/app/FileIO"
 )
 
-func AddUser(application string, username string, password string) {
-	go addUserHelper(application, username, password)
+func AddUser(application string, username string, password string) bool {
+	return addUserHelper(application, username, password)
 }
 
-func AuthUser(application string, username string, password string) {
-	go authUserHelper(application, username, password)
+func AuthUser(application string, username string, password string) string {
+	return authUserHelper(application, username, password)
 }
 
 func addUserHelper(application string, username string, password string) bool {
 	userHash := GenerateUserHash(username, password)
 	userPrex := GetUserHashPrex(userHash)
-	return file.WriteLine(application, "output", userHash, userPrex)
+	return file.WriteLine(application, userPrex, userHash)
 }
 
 func authUserHelper(application string, username string, password string) string {
 	userHash := GenerateUserHash(username, password)
 	userPrex := GetUserHashPrex(userHash)
-	rows := file.Read(application, "output", userPrex)
+	rows := file.Read(application, userPrex)
 	for _, row := range rows {
 		if row == userHash {
 			return userHash

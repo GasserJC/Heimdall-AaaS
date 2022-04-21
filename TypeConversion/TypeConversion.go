@@ -1,8 +1,10 @@
 package typeConversion
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
-func ByteArrayToInt(arr [32]byte) int64 {
+func ByteArrayToInt(arr [64]byte) int64 {
 	val := int64(0)
 	size := len(arr)
 	for i := 0; i < size; i++ {
