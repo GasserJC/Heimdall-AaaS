@@ -10,6 +10,13 @@ import (
 func reportPerformance() {
 	reportPerformanceAtSize(100)
 	reportPerformanceAtSize(10000)
+	reportPerformanceAtSize(25000)
+	reportPerformanceAtSize(50000)
+	reportPerformanceAtSize(75000)
+	reportPerformanceAtSize(100000)
+	reportPerformanceAtSize(250000)
+	reportPerformanceAtSize(500000)
+	reportPerformanceAtSize(750000)
 	reportPerformanceAtSize(1000000)
 	reportPerformanceAtSize(100000000)
 }
