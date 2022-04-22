@@ -7,13 +7,19 @@ Restrictions: persistant deployments.
   
 # Performance per Application on low Tier CPU Ubuntu 20.04 Container  
 User Count == 10,000  
-Add User: ~75 Microseconds
-Authenticate User: 43 Microseconds 
+Add User: ~75 Microseconds  
+Authenticate User: ~40 Microseconds  
   
   
 User Count == 100,000  
-Add User: ~95 Microseconds
-Authenticate User: ~85 Microseconds  
+Add User: ~90 Microseconds  
+Authenticate User: ~75 Microseconds  
+  
+    
+User Count == 1,000,000  
+Add User: ~90 Microseconds  
+Authenticate User: ~80 Microseconds  
+
 
 # Documentation
 
