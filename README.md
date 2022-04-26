@@ -19,8 +19,8 @@ Authenticate User: ~75 Microseconds
 User Count == 1,000,000  
 Add User: ~90 Microseconds  
 Authenticate User: ~80 Microseconds  
-
-
+  
+  
 # Documentation
 
 to be written...

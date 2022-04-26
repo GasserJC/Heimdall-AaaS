@@ -13,11 +13,11 @@ func TestGenerateUserHash(t *testing.T) {
 }
 
 func TestGetUserHashPrex(t *testing.T) {
-	userHashPrefix := GetUserHashPrex("7311242285026203200")
+	userHashPrefix := GetUserHashPrex("", "7311242285026203200")
 	if userHashPrefix != "731" {
 		t.Errorf("Generated user hash prefix function is improper for positive numbers.")
 	}
-	userHashPrefix = GetUserHashPrex("-7311242285026203200")
+	userHashPrefix = GetUserHashPrex("", "-7311242285026203200")
 	if userHashPrefix != "-731" {
 		t.Errorf("Generated user hash prefix function is improper for negative numbers.")
 	}

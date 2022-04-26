@@ -3,7 +3,11 @@ package file
 import (
 	"bufio"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -47,6 +51,40 @@ func IsRowUnique(rowToWrite string, fullRelativeFilePath string, useLowMemory bo
 		}
 	}
 	return true
+}
+
+func IncreaseAppFileGranularity(application string) {
+	files, _ := ioutil.ReadDir(baseDir + application + "/" + baseApplicationConfigFile)
+	averageFileSize := getAverageSizePerFile(files)
+	if averageFileSize > baseMaximumBytesPerFile {
+		os.RemoveAll(baseDir + application + "/" + baseApplicationConfigFile)
+		newGranularity := GetAppFileGranularity(application) + 1
+		WriteLine(application, baseApplicationConfigFile, fmt.Sprint(newGranularity))
+		increaseFileGranularity(application, newGranularity)
+	}
+}
+
+func getAverageSizePerFile(files []os.FileInfo) int {
+	var count int64 = 0
+	var totalSize int64 = 0
+	for _, file := range files {
+		if !file.IsDir() {
+			count++
+			totalSize += file.Size()
+		}
+	}
+	return int(totalSize / count)
+}
+
+func GetAppFileGranularity(application string) int {
+	rows := Read(application, baseApplicationConfigFile)
+	for _, rowValue := range rows {
+		if strings.Contains(rowValue, baseGranularityString) {
+			granularityString, _ := strconv.Atoi(rowValue[len(baseGranularityString):])
+			return granularityString
+		}
+	}
+	return baseGranularity
 }
 
 func ensureFolderPath(directory string) {

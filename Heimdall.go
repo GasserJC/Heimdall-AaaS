@@ -1,12 +1,16 @@
 package main
 
 import (
+	"time"
+
 	cryptography "heimdall.com/app/Cryptography"
 	file "heimdall.com/app/FileIO"
 )
 
+const maximumAcceptableTime int64 = 1000
+
 func main() {
-	reportPerformance()
+	AddUser("testApp", "tester", "password")
 }
 
 func AddUser(application string, username string, password string) bool {
@@ -22,14 +26,21 @@ func AuthUser(application string, username string, password string) string {
 }
 
 func addUserHelper(application string, username string, password string, out chan bool) {
-	userHash := GenerateUserHash(username, password)
-	userPrex := GetUserHashPrex(userHash)
+	now := time.Now()
+	userHash := cryptography.GenerateUserHash(username, password)
+	prefixLength := file.GetAppFileGranularity(application)
+	userPrex := cryptography.GetUserHashPrex(application, userHash, prefixLength)
 	out <- file.WriteLine(application, userPrex, userHash)
+	then := time.Now()
+	if then.Sub(now).Microseconds() < file.BaseMaximumAddUserTime {
+		file.IncreaseAppFileGranularity(application)
+	}
 }
 
 func authUserHelper(application string, username string, password string, out chan string) {
-	userHash := GenerateUserHash(username, password)
-	userPrex := GetUserHashPrex(userHash)
+	userHash := cryptography.GenerateUserHash(username, password)
+	prefixLength := file.GetAppFileGranularity(application)
+	userPrex := cryptography.GetUserHashPrex(application, userHash, prefixLength)
 	authUserHash := ""
 	rows := file.Read(application, userPrex)
 	for _, row := range rows {
@@ -39,17 +50,4 @@ func authUserHelper(application string, username string, password string, out ch
 		}
 	}
 	out <- authUserHash
-}
-
-func GetUserHashPrex(userHash string) string {
-	if userHash[0] == '-' {
-		return userHash[0:4]
-	} else {
-		return userHash[0:3]
-	}
-}
-
-func GenerateUserHash(username string, password string) string {
-	var hashString = username + password + password + username
-	return cryptography.Hash(hashString)
 }
