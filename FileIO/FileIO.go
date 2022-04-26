@@ -65,7 +65,7 @@ func IncreaseAppFileGranularity(application string) {
 }
 
 func getAverageSizePerFile(files []os.FileInfo) int {
-	var count int64 = 0
+	var count int64 = 1
 	var totalSize int64 = 0
 	for _, file := range files {
 		if !file.IsDir() {
