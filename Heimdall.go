@@ -10,7 +10,7 @@ import (
 const maximumAcceptableTime int64 = 1000
 
 func main() {
-	AddUser("testApp", "tester", "password")
+	reportPerformance()
 }
 
 func AddUser(application string, username string, password string) bool {
